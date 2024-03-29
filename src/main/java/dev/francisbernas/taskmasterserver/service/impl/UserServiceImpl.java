@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public boolean deleteUserById(Long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             // TODO: dynamic deletedBy field - need Spring Security for this
@@ -55,10 +55,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUserById(Long userId, UserDto userDto) {
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
         if (optionalUser.isPresent()) {
-            User updatedUser = userRepository.save(UserMapper.mapDtoToEntity(userDto));
-            return UserMapper.mapEntityToDto(updatedUser);
+            if (!userId.equals(userDto.getId())) {
+                throw new RuntimeException(String.format("User id %s doesn't match given path variable id %s", userDto.getId(), userId));
+            }
+            User updatedUser = UserMapper.mapDtoToEntity(userDto);
+            // TODO: dynamic deletedBy field - need Spring Security for this
+            updatedUser.setLastModifiedBy("admin");
+            updatedUser.setLastModifiedDate(LocalDateTime.now());
+            User savedUpdatedUser = userRepository.save(updatedUser);
+            return UserMapper.mapEntityToDto(savedUpdatedUser);
         } else {
             throw new RuntimeException(String.format("User with id %s doesn't exist", userId));
         }

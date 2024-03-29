@@ -27,12 +27,12 @@ public abstract class AuditingEntity {
     private String lastModifiedBy;
 
 //    @LastModifiedDate
-    @Column(name = "last_modified_date", updatable = false)
+    @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
 
     @Column(name = "deleted_by", length = 50)
     private String deletedBy;
 
-    @Column(name = "deleted_date", updatable = false)
+    @Column(name = "deleted_date")
     private LocalDateTime deletedDate;
 }

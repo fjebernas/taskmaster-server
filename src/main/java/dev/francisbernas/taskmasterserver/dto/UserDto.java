@@ -19,4 +19,15 @@ public class UserDto {
     private String lastName;
 
     private String password;
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }
