@@ -19,16 +19,16 @@ public class User extends AuditingEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false, length = 10, unique = true, updatable = true)
+    @Column(name = "username", nullable = false, length = 10, unique = true)
     private String username;
 
-    @Column(name = "first_name", nullable = false, length = 20, updatable = true)
+    @Column(name = "first_name", nullable = false, length = 20)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false, length = 20, updatable = true)
+    @Column(name = "last_name", nullable = false, length = 20)
     private String lastName;
 
-    @Column(name = "password", nullable = false, updatable = true)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

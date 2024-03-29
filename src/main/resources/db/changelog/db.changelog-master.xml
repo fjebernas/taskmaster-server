@@ -5,7 +5,7 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <changeSet id="1" author="francisbernas">
         <createTable tableName="t_users">
-            <column name="id" type="bigint">
+            <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="username" type="varchar(10)">
@@ -32,7 +32,7 @@
             <column name="deleted_date" type="timestamp"/>
         </createTable>
         <createTable tableName="t_projects">
-            <column name="id" type="bigint">
+            <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="varchar(20)">
