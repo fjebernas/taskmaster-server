@@ -31,12 +31,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User userEntity = UserMapper.mapDtoToEntity(userDto);
-        // TODO: dynamic createdBy field - need Spring Security for this
-        userEntity.setCreatedBy("admin");
-        userEntity.setCreatedDate(LocalDateTime.now());
-        User createdUser = userRepository.save(userEntity);
-        return UserMapper.mapEntityToDto(createdUser);
+        if (userDto.getId() != null) {
+            throw new RuntimeException(String.format("A user to create cannot have an id: %s", userDto.getId()));
+        } else {
+            User userEntity = UserMapper.mapDtoToEntity(userDto);
+            // TODO: dynamic createdBy field - need Spring Security for this
+            userEntity.setCreatedBy("admin");
+            userEntity.setCreatedDate(LocalDateTime.now());
+            User createdUser = userRepository.save(userEntity);
+            return UserMapper.mapEntityToDto(createdUser);
+        }
     }
 
     @Transactional
