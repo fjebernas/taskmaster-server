@@ -1,78 +1,118 @@
 package dev.francisbernas.taskmasterserver.service;
 
+
 import dev.francisbernas.taskmasterserver.dto.UserDto;
 import dev.francisbernas.taskmasterserver.entity.User;
 import dev.francisbernas.taskmasterserver.repository.UserRepository;
+import dev.francisbernas.taskmasterserver.service.impl.UserServiceImpl;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class UserServiceImplTest {
+	@Mock
+	private UserRepository userRepository;
 
-    @Autowired
-    private UserService userService;
+	@InjectMocks
+	private UserServiceImpl userService;
 
-    @MockBean
-    private UserRepository userRepository;
+	@Test
+	public void testGetAllUsers() {
+		List<User> users = List.of(
+				new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList()),
+				new User(2L, "maryGrace123", "Mary", "Grace", "h283gf2", Collections.emptyList())
+		);
 
-    @Test
-    public void testGetAllUsers() {
-        // Mock repository to return a list of users
-        List<User> userList = new ArrayList<>();
-        userList.add(new User(1L, "johnDoe123", "John", "Doe", "password", Collections.emptyList()));
-        Mockito.when(userRepository.findAllNotDeleted()).thenReturn(userList);
+		Mockito.when(userRepository.findAllNotDeleted()).thenReturn(users);
 
-        List<UserDto> userDtoList = userService.getAllUsers();
-        Assertions.assertEquals(1, userDtoList.size());
-        Assertions.assertEquals("John", userDtoList.get(0).getFirstName());
-    }
+		Assertions.assertEquals(
+				users.size(),
+				userService.getAllUsers().size()
+		);
+	}
 
-    @Test
-    public void testGetUserById() {
-        // Mock repository to return a user
-        User user = new User(1L, "johnDoe123", "John", "Doe", "password", Collections.emptyList());
-        Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.of(user));
+	@Test
+	public void testGetUserByIdWhereUserIsExisting() {
+		List<User> users = List.of(
+				new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList()),
+				new User(2L, "maryGrace123", "Mary", "Grace", "h283gf2", Collections.emptyList())
+		);
 
-        UserDto userDto = userService.getUserById(1L);
-        Assertions.assertNotNull(userDto);
-        Assertions.assertEquals("John", userDto.getFirstName());
-    }
+		Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.of(users.get(0)));
 
-    @Test
-    public void testCreateUser() {
-        UserDto userDto = new UserDto(null, "janeSmith345", "Jane", "Smith", "password");
-        User userEntity = new User(null, "janeSmith345", "Jane", "Smith", "password", Collections.emptyList());
+		Assertions.assertEquals(
+				users.get(0).getId(),
+				userService.getUserById(1L).getId()
+		);
 
-        // Mock repository save method
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(userEntity);
+		Mockito.when(userRepository.findByIdNotDeleted(2L)).thenReturn(Optional.of(users.get(1)));
 
-        UserDto createdUserDto = userService.createUser(userDto);
-        Assertions.assertNotNull(createdUserDto);
-        Assertions.assertEquals("Jane", createdUserDto.getFirstName());
-    }
+		Assertions.assertEquals(
+				users.get(1).getId(),
+				userService.getUserById(2L).getId()
+		);
+	}
 
-    @Test
-    public void testDeleteUserById() {
-        User user = new User(1L, "johnDoe123", "John", "Doe", "password", Collections.emptyList());
+	@Test
+	public void testGetUserByIdWhereUserIsNotExisting() {
+		Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.empty());
 
-        // Mock repository findByIdNotDeleted method
-        Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.of(user));
+		Assertions.assertNull(userService.getUserById(1L));
+	}
 
-        boolean isDeleted = userService.deleteUserById(1L);
-        Assertions.assertTrue(isDeleted);
-    }
+	@Test
+	public void testCreateUser() {
+		UserDto userDto = new UserDto(null, "johnDoe123", "John", "Doe", "f2k0j32f");
 
-//    @Test
-//    public void testUpdateUserById() {
-//    }
+		User userEntity = new User(null, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(userEntity);
 
+		UserDto result = userService.createUser(userDto);
+
+		Assertions.assertNotNull(result);
+		Assertions.assertEquals(userEntity.getUsername(), result.getUsername());
+	}
+
+	@Test
+	public void testDeleteUserByIdWhereUserIsExisting() {
+		User user = new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
+		Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.of(user));
+
+		boolean result = userService.softDeleteUserById(1L);
+
+		Assertions.assertTrue(result);
+	}
+
+	@Test
+	public void testDeleteUserByIdWhereUserIsNotExisting() {
+		Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.empty());
+
+		boolean result = userService.softDeleteUserById(1L);
+
+		Assertions.assertFalse(result);
+	}
+
+	@Test
+	public void testUpdateUserById() {
+		User existingUser = new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
+		User updatedUser = new User(1L, "spectacularDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
+
+		Mockito.when(userRepository.findByIdNotDeleted(1L)).thenReturn(Optional.of(existingUser));
+		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(updatedUser);
+
+		UserDto updateRequestuserDto = new UserDto(1L, "spectacularDoe123", "John", "Doe", "f2k0j32f");
+		UserDto result = userService.updateUserById(1L, updateRequestuserDto);
+
+		Assertions.assertNotNull(result);
+		Assertions.assertEquals(updatedUser.getUsername(), result.getUsername());
+	}
 }

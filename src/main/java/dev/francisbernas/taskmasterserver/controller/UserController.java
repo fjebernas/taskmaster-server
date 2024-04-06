@@ -50,7 +50,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUserById(@PathVariable Long userId) {
         log.info("Attempting to delete user with id {}", userId);
-        boolean isDeleted = userService.deleteUserById(userId);
+        boolean isDeleted = userService.softDeleteUserById(userId);
         if (isDeleted) {
             log.info("User with id {} deleted successfully", userId);
             return new ResponseEntity<>(HttpStatus.OK);

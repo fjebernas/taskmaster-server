@@ -45,12 +45,12 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public boolean deleteUserById(Long userId) {
+    public boolean softDeleteUserById(Long userId) {
         Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             // TODO: dynamic deletedBy field - need Spring Security for this
-            userRepository.deleteById("admin", LocalDateTime.now(), user.getId());
+            userRepository.softDeleteById("admin", LocalDateTime.now(), user.getId());
             return true;
         } else {
             return false;

@@ -19,5 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying
     @Query("UPDATE User u SET u.deletedBy = :deletedBy, u.deletedDate = :deletedDate WHERE u.id = :userId")
-    void deleteById(@Param("deletedBy") String deletedBy, @Param("deletedDate")LocalDateTime deletedDate, @Param("userId") Long userId);
+    void softDeleteById(@Param("deletedBy") String deletedBy, @Param("deletedDate")LocalDateTime deletedDate, @Param("userId") Long userId);
 }
