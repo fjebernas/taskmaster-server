@@ -20,12 +20,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.mapEntitiesToDtos(userRepository.findAllNotDeleted());
+        return UserMapper.mapEntitiesToDtos(userRepository.findAllExcludingSoftDeleted());
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(userId);
         return optionalUser.map(UserMapper::mapEntityToDto).orElse(null);
     }
 
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public boolean softDeleteUserById(Long userId) {
-        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             // TODO: dynamic deletedBy field - need Spring Security for this
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUserById(Long userId, UserDto userDto) {
-        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(userId);
         if (optionalUser.isPresent()) {
             if (!userId.equals(userDto.getId())) {
                 throw new RuntimeException(String.format("User id %s doesn't match given path variable id %s", userDto.getId(), userId));

@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.deletedDate IS NULL")
-    List<User> findAllNotDeleted();
+    List<User> findAllExcludingSoftDeleted();
 
     @Query("SELECT u FROM User u WHERE u.id = :userId AND u.deletedDate IS NULL")
-    Optional<User> findByIdNotDeleted(@Param("userId") Long userId);
+    Optional<User> findByIdNotSoftDeleted(@Param("userId") Long userId);
 
     @Modifying
     @Query("UPDATE User u SET u.deletedBy = :deletedBy, u.deletedDate = :deletedDate WHERE u.id = :userId")

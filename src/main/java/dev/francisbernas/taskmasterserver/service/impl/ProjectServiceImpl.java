@@ -29,7 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjectsByUserId(Long userId) {
-        Optional<User> optionalUser = userRepository.findByIdNotDeleted(userId);
+        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(userId);
         if (optionalUser.isPresent()) {
             return ProjectMapper.mapEntitiesToDtos(projectRepository.findAllByUserNotDeleted(optionalUser.get()));
         } else {
@@ -45,7 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto createProject(ProjectDto projectDto) {
-        Optional<User> optionalUser = userRepository.findByIdNotDeleted(projectDto.getUserDto().getId());
+        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(projectDto.getUserDto().getId());
         if (optionalUser.isPresent()) {
             Project projectEntity = ProjectMapper.mapDtoToEntity(projectDto);
             // TODO: dynamic createdBy field - need Spring Security for this
