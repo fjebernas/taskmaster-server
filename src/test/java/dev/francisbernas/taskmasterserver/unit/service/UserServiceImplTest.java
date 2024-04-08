@@ -1,4 +1,4 @@
-package dev.francisbernas.taskmasterserver.service;
+package dev.francisbernas.taskmasterserver.unit.service;
 
 
 import dev.francisbernas.taskmasterserver.dto.UserDto;

@@ -45,16 +45,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto createProject(ProjectDto projectDto) {
-        Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(projectDto.getUserDto().getId());
-        if (optionalUser.isPresent()) {
-            Project projectEntity = ProjectMapper.mapDtoToEntity(projectDto);
-            // TODO: dynamic createdBy field - need Spring Security for this
-            projectEntity.setCreatedBy("admin");
-            projectEntity.setCreatedDate(LocalDateTime.now());
-            Project createdProject = projectRepository.save(projectEntity);
-            return ProjectMapper.mapEntityToDto(createdProject);
+        if (projectDto.getId() != null) {
+            throw new RuntimeException(String.format("A project to create cannot have an id: %s", projectDto.getId()));
         } else {
-            throw new RuntimeException(String.format("User with id %s doesn't exist, failed to create project", projectDto.getUserDto().getId()));
+            Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(projectDto.getUserDto().getId());
+            if (optionalUser.isPresent()) {
+                Project projectEntity = ProjectMapper.mapDtoToEntity(projectDto);
+                // TODO: dynamic createdBy field - need Spring Security for this
+                projectEntity.setCreatedBy("admin");
+                projectEntity.setCreatedDate(LocalDateTime.now());
+                Project createdProject = projectRepository.save(projectEntity);
+                return ProjectMapper.mapEntityToDto(createdProject);
+            } else {
+                throw new RuntimeException(String.format("User with id %s doesn't exist, failed to create project", projectDto.getUserDto().getId()));
+            }
         }
     }
 

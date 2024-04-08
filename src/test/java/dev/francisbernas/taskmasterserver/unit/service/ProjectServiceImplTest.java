@@ -1,4 +1,4 @@
-package dev.francisbernas.taskmasterserver.service;
+package dev.francisbernas.taskmasterserver.unit.service;
 
 import dev.francisbernas.taskmasterserver.dto.ProjectDto;
 import dev.francisbernas.taskmasterserver.dto.UserDto;
@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,34 @@ public class ProjectServiceImplTest {
 	}
 
 	@Test
+	public void testGetAllProjectsExcludingSoftDeleted() {
+		List<Project> testProjects = List.of(
+				new Project(1L, "good project", "a project that does good things", testUser),
+				new Project(2L, "bad project", "a project that does bad things", testUser)
+		);
+
+		// Soft delete second project
+		Project softDeletedProject = testProjects.get(1);
+		softDeletedProject.setDeletedBy("admin");
+		softDeletedProject.setDeletedDate(LocalDateTime.now());
+
+		// This imitates the query used by the service class from the repository interface
+		// See method findAllNotDeleted()
+		Mockito.when(projectRepository.findAllExcludingSoftDeleted())
+				.thenReturn(
+						testProjects
+								.stream()
+								.filter(project -> project.getDeletedBy() == null)
+								.toList()
+				);
+
+		Assertions.assertEquals(
+				1,
+				projectService.getAllProjects().size()
+		);
+	}
+
+	@Test
 	public void testGetAllProjectsByUserId() {
 		List<Project> testProjects = List.of(
 				new Project(1L, "good project", "a project that does good things", testUser),
@@ -67,13 +96,38 @@ public class ProjectServiceImplTest {
 	}
 
 	@Test
-	public void testGetProjectById() {
+	public void testGetProjectByIdWhereProjectIsExisting() {
 		Project testProject = new Project(1L, "good project", "a project that does good things", testUser);
 		Mockito.when(projectRepository.findByIdNotSoftDeleted(1L)).thenReturn(Optional.of(testProject));
 
 		ProjectDto projectDto = projectService.getProjectById(1L);
 		Assertions.assertNotNull(projectDto);
 		Assertions.assertEquals(testProject.getId(), projectDto.getId());
+	}
+
+	@Test
+	public void testGetProjectByIdWhereProjectIsNotExisting() {
+		Mockito.when(projectRepository.findByIdNotSoftDeleted(1L)).thenReturn(Optional.empty());
+
+		Assertions.assertNull(projectService.getProjectById(1L));
+	}
+
+	@Test
+	public void testGetProjectByIdWhereProjectIsNotSoftDeleted() {
+		Project testProject = new Project(1L, "good project", "a project that does good things", testUser);
+
+		// Soft delete the project
+		testProject.setDeletedBy("admin");
+		testProject.setDeletedDate(LocalDateTime.now());
+
+		// This imitates the query used by the service class from the repository interface
+		// See method findByIdNotDeleted()
+		Mockito.when(projectRepository.findByIdNotSoftDeleted(1L))
+				.thenReturn(testProject.getDeletedBy() == null ? Optional.of(testProject) : Optional.empty());
+
+		Assertions.assertNull(
+				projectService.getProjectById(1L)
+		);
 	}
 
 	@Test
@@ -92,10 +146,8 @@ public class ProjectServiceImplTest {
 	}
 
 	@Test
-	public void testCreateUserWhereDtoHasNonNullId() {
+	public void testCreateProjectWhereDtoHasNonNullId() {
 		ProjectDto projectDto = new ProjectDto(1L, "good project", "a project that does good things", testUserDto);
-
-		Mockito.when(userRepository.findByIdNotSoftDeleted(1L)).thenReturn(Optional.of(testUser));
 
 		Assertions.assertThrows(RuntimeException.class, () -> projectService.createProject(projectDto));
 	}

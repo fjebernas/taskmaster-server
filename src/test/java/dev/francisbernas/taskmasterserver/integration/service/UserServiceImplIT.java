@@ -1,8 +1,9 @@
-package dev.francisbernas.taskmasterserver.service;
+package dev.francisbernas.taskmasterserver.integration.service;
 
 import dev.francisbernas.taskmasterserver.dto.UserDto;
 import dev.francisbernas.taskmasterserver.entity.User;
 import dev.francisbernas.taskmasterserver.repository.UserRepository;
+import dev.francisbernas.taskmasterserver.service.UserService;
 import dev.francisbernas.taskmasterserver.service.impl.UserServiceImpl;
 import dev.francisbernas.taskmasterserver.testdata.UserTestData;
 import jakarta.annotation.PostConstruct;
@@ -74,13 +75,16 @@ public class UserServiceImplIT {
 
 	@Test
 	public void testCreateUser() {
+		long savedUsersCount = userRepository.findAll().size();
+
 		UserDto userDto = new UserDto()
 				.setUsername("conor123")
 				.setFirstName("Conor")
 				.setLastName("McGregor")
 				.setPassword("xjnuh389h");
 		userService.createUser(userDto);
-		UserDto createdUserDto = userService.getUserById(5L);
+
+		UserDto createdUserDto = userService.getUserById(savedUsersCount + 1);
 		assertNotNull(createdUserDto);
 	}
 
