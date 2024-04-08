@@ -13,13 +13,13 @@ import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p WHERE p.deletedDate IS NULL")
-    List<Project> findAllNotDeleted();
+    List<Project> findAllExcludingSoftDeleted();
 
     @Query("SELECT p FROM Project p WHERE p.user = :user AND p.deletedDate IS NULL")
-    List<Project> findAllByUserNotDeleted(@Param("user") User user);
+    List<Project> findAllByUserExcludingSoftDeleted(@Param("user") User user);
 
     @Query("SELECT p FROM Project p WHERE p.id = :projectId AND p.deletedDate IS NULL")
-    Optional<Project> findByIdNotDeleted(@Param("projectId") Long projectId);
+    Optional<Project> findByIdNotSoftDeleted(@Param("projectId") Long projectId);
 
     @Modifying
     @Query("UPDATE Project p SET p.deletedBy = :deletedBy, p.deletedDate = :deletedDate WHERE p.id = :projectId")

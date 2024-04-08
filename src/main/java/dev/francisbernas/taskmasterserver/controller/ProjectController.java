@@ -58,7 +58,7 @@ public class ProjectController {
     @DeleteMapping("/projects/{projectId}")
     public ResponseEntity<?> deleteProjectById(@PathVariable Long projectId) {
         log.info("Attempting to delete project with id {}", projectId);
-        boolean isDeleted = projectService.deleteProjectById(projectId);
+        boolean isDeleted = projectService.softDeleteProjectById(projectId);
         if (isDeleted) {
             log.info("Project with id {} deleted successfully", projectId);
             return new ResponseEntity<>(HttpStatus.OK);

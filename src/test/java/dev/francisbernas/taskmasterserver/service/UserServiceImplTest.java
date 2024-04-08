@@ -121,7 +121,7 @@ public class UserServiceImplTest {
 	public void testCreateUser() {
 		UserDto userDto = new UserDto(null, "johnDoe123", "John", "Doe", "f2k0j32f");
 
-		User userEntity = new User(null, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
+		User userEntity = new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
 		Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(userEntity);
 
 		UserDto result = userService.createUser(userDto);
@@ -134,11 +134,11 @@ public class UserServiceImplTest {
 	public void testCreateUserWhereDtoHasNonNullId() {
 		UserDto userDto = new UserDto(1L, "johnDoe123", "John", "Doe", "f2k0j32f");
 
-		Assertions.assertThrowsExactly(RuntimeException.class, () -> userService.createUser(userDto));
+		Assertions.assertThrows(RuntimeException.class, () -> userService.createUser(userDto));
 	}
 
 	@Test
-	public void testDeleteUserByIdWhereUserIsExisting() {
+	public void testSoftDeleteUserByIdWhereUserIsExisting() {
 		User user = new User(1L, "johnDoe123", "John", "Doe", "f2k0j32f", Collections.emptyList());
 		Mockito.when(userRepository.findByIdNotSoftDeleted(1L)).thenReturn(Optional.of(user));
 
@@ -148,7 +148,7 @@ public class UserServiceImplTest {
 	}
 
 	@Test
-	public void testDeleteUserByIdWhereUserIsNotExisting() {
+	public void testSoftDeleteUserByIdWhereUserIsNotExisting() {
 		Mockito.when(userRepository.findByIdNotSoftDeleted(1L)).thenReturn(Optional.empty());
 
 		boolean result = userService.softDeleteUserById(1L);

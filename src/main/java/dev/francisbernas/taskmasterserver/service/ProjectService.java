@@ -13,7 +13,7 @@ public interface ProjectService {
 
     ProjectDto createProject(ProjectDto projectDto);
 
-    boolean deleteProjectById(Long projectId);
+    boolean softDeleteProjectById(Long projectId);
 
     ProjectDto updateProjectById(Long projectId, ProjectDto projectDto);
 }

@@ -24,14 +24,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects() {
-        return ProjectMapper.mapEntitiesToDtos(projectRepository.findAllNotDeleted());
+        return ProjectMapper.mapEntitiesToDtos(projectRepository.findAllExcludingSoftDeleted());
     }
 
     @Override
     public List<ProjectDto> getAllProjectsByUserId(Long userId) {
         Optional<User> optionalUser = userRepository.findByIdNotSoftDeleted(userId);
         if (optionalUser.isPresent()) {
-            return ProjectMapper.mapEntitiesToDtos(projectRepository.findAllByUserNotDeleted(optionalUser.get()));
+            return ProjectMapper.mapEntitiesToDtos(projectRepository.findAllByUserExcludingSoftDeleted(optionalUser.get()));
         } else {
             throw new RuntimeException(String.format("User with id %s doesn't exist, failed to get projects", userId));
         }
@@ -39,7 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto getProjectById(Long projectId) {
-        Optional<Project> optionalProject = projectRepository.findByIdNotDeleted(projectId);
+        Optional<Project> optionalProject = projectRepository.findByIdNotSoftDeleted(projectId);
         return optionalProject.map(ProjectMapper::mapEntityToDto).orElse(null);
     }
 
@@ -60,8 +60,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     @Override
-    public boolean deleteProjectById(Long projectId) {
-        Optional<Project> optionalProject = projectRepository.findByIdNotDeleted(projectId);
+    public boolean softDeleteProjectById(Long projectId) {
+        Optional<Project> optionalProject = projectRepository.findByIdNotSoftDeleted(projectId);
         if (optionalProject.isPresent()) {
             Project project = optionalProject.get();
             projectRepository.softDeleteById("admin", LocalDateTime.now(), project.getId());
@@ -73,7 +73,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDto updateProjectById(Long projectId, ProjectDto projectDto) {
-        Optional<Project> optionalProject = projectRepository.findByIdNotDeleted(projectId);
+        Optional<Project> optionalProject = projectRepository.findByIdNotSoftDeleted(projectId);
         if (optionalProject.isPresent()) {
             if (!projectId.equals(projectDto.getId())) {
                 throw new RuntimeException(String.format("Project id %s doesn't match given path variable id %s", projectDto.getId(), projectId));
